@@ -6,7 +6,7 @@ export default class Container extends Node {
     left
     top
     children = []
-    constructor(X, Y, width, height, left = width / 2, top = height / 2) {
+    constructor(X, Y, width = 0, height = 0, left = width / 2, top = height / 2) {
         super(X, Y)
         this.width = width
         this.height = height
@@ -17,13 +17,13 @@ export default class Container extends Node {
     appendChild(child) {
         if (!this.children.includes(child)) {
             child.X += this.X
-            child.Y += this.y
+            child.Y += this.Y
             this.children.push(child)
         }
     }
 
     removeChild(child) {
-        let index = this.children.findIndex(item=>item===child)
+        let index = this.children.findIndex(item => item === child)
         if (index > -1) {
             this.children.splice(index, 1)
             child.X -= this.X

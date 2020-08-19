@@ -26,7 +26,7 @@ export default class Sprite {
   ctx = this.canvas2d.ctx;
   canvas = this.canvas2d.canvas;
 
-  constructor(X = this.canvas.width / 2, Y = this.canvas.height / 2) {
+  constructor(X = 0, Y = 0) {
     this.X = X;
     this.Y = Y;
 

@@ -110,7 +110,7 @@ class Bullet extends Container {
     fire() {
         this.animation = () => {
             this.x = this.X - this.counter
-            this.counter++
+            this.counter = this.counter + 2
             this.ctx.translate(this.x, this.y)
             if (this.x < this.canvas.width / window.devicePixelRatio - this.width) {
                 if (this.fired) return
@@ -122,8 +122,6 @@ class Bullet extends Container {
             }
         }
     }
-
-
 }
 
 export default class Shooter extends EventEmitter {
@@ -135,31 +133,31 @@ export default class Shooter extends EventEmitter {
     ] // 弹道
     catridge = [] // 弹药箱
 
+    constructor() {
+        super()
+        bus.on('fired', channel => {
+            let couple = this.catridge.shift()
+            if (!couple) return this.emit('empty')
+            // 重置弹道状态
+            this.channels.find(item => item.channel === channel).fired = true
+            // 随机挑选空闲弹道
+            let freeChannel = this.channels.filter(item => item.fired).getSample()
+            // 装弹
+            let bullet = new Bullet(undefined, freeChannel.channel, couple.avatarUrls, couple.words)
+            freeChannel.fired = false
+            // 1s后发射
+            // setTimeout(() => {
+                bullet.fire()
+            // }, 1000)
+        })
+    }
+
     // 连发
     fireaway() {
-        bus.on('fired', channel => {
-            console.log('fired', this.catridge.length)
-            let firedChannel = this.channels.find(item => {
-                return item.channel === channel
-            })
-            firedChannel.fired = true
-            let nextFireChannel = this.channels.filter(item => item.fired).getSample()
-            let couple = this.catridge.shift()
-            if (couple) {
-                let bullet = new Bullet(375, nextFireChannel.channel, couple.avatarUrls, couple.words)
-                setTimeout(() => {
-                    nextFireChannel.fired = false
-                    bullet.fire()
-                }, 100)
-            } else {
-                this.emit('empty')
-            }
-        })
-
         this.channels.filter(item => item.fired).map(item => {
             let couple = this.catridge.shift()
             if (!couple) return this.emit('empty')
-            let bullet = new Bullet(375, item.channel, couple.avatarUrls, couple.words)
+            let bullet = new Bullet(undefined, item.channel, couple.avatarUrls, couple.words)
             bullet.fire()
             item.fired = false
         })

@@ -2,7 +2,7 @@ import Canvas2D from './canvas2d.js';
 import EventEmitter from 'events'
 
 // 注意canvas纵轴正方向向下
-export default class Node extends EventEmitter{
+export default class Node extends EventEmitter {
   static _instance;
   static async getInstance() {
     if (!this._instance) {
@@ -43,11 +43,15 @@ export default class Node extends EventEmitter{
     throw new Error('子类需实现此方法');
   }
 
+  destroy() {
+    let index = this.canvas2d.nodes.findIndex(node => node === this)
+    this.canvas2d.nodes.splice(index, 1)
+  }
+
   resetAnimation() {
     this._animation = () => {
-      let { X, Y } = this;
-      this.x = X;
-      this.y = Y;
+      this.x = this.X;
+      this.y = this.Y;
       this.ctx.translate(this.x, this.y);
       this.counter = 0;
     };

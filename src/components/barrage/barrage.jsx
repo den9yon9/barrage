@@ -66,14 +66,12 @@ export default class Barrage extends Component {
         canvas2d.loopCanvas()
 
         const shooter = new Shooter()
-        shooter.reload(couples)
-
+        shooter.reloading(couples)
         shooter.fireaway()
 
-        shooter.on('empty', () => {
-            console.log('empty')
-            shooter.reload(couples)
-            // shooter.fireaway()
+        shooter.on('reloading', () => {
+            console.log('reloading')
+            shooter.reloading(couples)
         })
     }
     render() {

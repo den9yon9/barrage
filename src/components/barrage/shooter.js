@@ -3,6 +3,7 @@ import Container from '../../lib/canvas/container'
 import Sprite from '../../lib/canvas/sprite.js'
 import Text from '../../lib/canvas/text.js'
 import EventEmitter from 'events'
+import Canvas2D from '../../lib/canvas/canvas2d.js'
 
 Array.prototype.getSample = function () {
     return this[Math.floor(Math.random() * this.length)]
@@ -48,7 +49,6 @@ class Rect extends Node {
         this.ctx.beginPath()
         this.ctx.fillStyle = this.color
         this.ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height)
-        // this.ctx.fill()
         this.ctx.closePath()
         this.ctx.restore()
     }
@@ -67,8 +67,8 @@ class Semicircle extends Node {
         this.ctx.beginPath()
         this.ctx.fillStyle = this.color
         this.ctx.arc(0, 0, this.radius, this.startAngle, this.startAngle + Math.PI)
-        this.ctx.fill()
         this.ctx.closePath()
+        this.ctx.fill()
         this.ctx.restore()
     }
 }
@@ -98,73 +98,75 @@ class Bullet extends Container {
         rect.zIndex = -1
 
         // 绘制半圆背景
-        const semicircle = new Semicircle(rectX + rectWidth / 2, 0, Avatar.width / 2, 'rgba(0,0,0,0.3)', -Math.PI / 2)
+        const semicircle = new Semicircle(rectX + rectWidth / 2 + 1, 0, Avatar.width / 2, 'rgba(0,0,0,0.3)', -Math.PI / 2)
 
-
-        this.appendChild(semicircle)
-        this.appendChild(rect)
         avatars.forEach(avatar => this.appendChild(avatar))
+        this.appendChild(rect)
         this.appendChild(text)
+        this.appendChild(semicircle)
     }
 
     fire() {
         this.animation = () => {
             this.x = this.X - this.counter
-            this.counter = this.counter + 2
+            this.counter = this.counter + 1
             this.ctx.translate(this.x, this.y)
+            if (this.x < -this.width) {
+                this.destroy()
+            }
+            if (this.fired) return
             if (this.x < this.canvas.width / window.devicePixelRatio - this.width) {
-                if (this.fired) return
                 this.fired = true
                 bus.emit('fired', this.channel)
             }
-            if (this.x < -this.width) {
-                this.emit('out')
-            }
+
         }
     }
 }
 
 export default class Shooter extends EventEmitter {
     channels = [
-        { channel: 1, fired: true },
-        { channel: 2, fired: true },
-        { channel: 3, fired: true },
-        { channel: 4, fired: true }
+        { channel: 1, free: true },
+        { channel: 2, free: true },
+        { channel: 3, free: true },
+        { channel: 4, free: true }
     ] // 弹道
     catridge = [] // 弹药箱
+    canvas = Canvas2D.getInstance().canvas
 
     constructor() {
         super()
-        bus.on('fired', channel => {
+        bus.on('fired', channelValue => {
             let couple = this.catridge.shift()
+            if (this.catridge.length < 10) this.emit('reloading')
             if (!couple) return this.emit('empty')
+
             // 重置弹道状态
-            this.channels.find(item => item.channel === channel).fired = true
-            // 随机挑选空闲弹道
-            let freeChannel = this.channels.filter(item => item.fired).getSample()
+            let channel = this.channels.find(item => item.channel === channelValue)
+            channel.free = true
+
             // 装弹
-            let bullet = new Bullet(undefined, freeChannel.channel, couple.avatarUrls, couple.words)
-            freeChannel.fired = false
+            let bullet = new Bullet(this.canvas.width / window.devicePixelRatio, channelValue, couple.avatarUrls, couple.words)
+            channel.free = false
             // 1s后发射
-            // setTimeout(() => {
-                bullet.fire()
-            // }, 1000)
+            setTimeout(bullet.fire.bind(bullet), 200)
         })
     }
 
     // 连发
     fireaway() {
-        this.channels.filter(item => item.fired).map(item => {
+        this.channels.filter(item => item.free).map(item => {
             let couple = this.catridge.shift()
+            if (this.catridge.length < 10) this.emit('reloading')
             if (!couple) return this.emit('empty')
-            let bullet = new Bullet(undefined, item.channel, couple.avatarUrls, couple.words)
+            let bullet = new Bullet(this.canvas.width / window.devicePixelRatio, item.channel, couple.avatarUrls, couple.words)
             bullet.fire()
-            item.fired = false
+            item.free = false
         })
     }
 
     // 填充弹药箱(重新取数据)
-    reload(couples) {
-        this.catridge = couples
+    reloading(couples) {
+        this.catridge.push(...couples)
     }
 }

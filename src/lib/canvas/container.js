@@ -14,6 +14,11 @@ export default class Container extends Node {
         this.top = top
     }
 
+    destroy() {
+        this.children.forEach(child => child.destroy())
+        super.destroy()
+    }
+
     appendChild(child) {
         if (!this.children.includes(child)) {
             child.x = child.X + this.x
@@ -22,26 +27,26 @@ export default class Container extends Node {
         }
     }
 
-    resetAnimation(){
-        super.restore()
-        this.children.forEach(child=>{
+    resetAnimation() {
+        super.resetAnimation()
+        this.children.forEach(child => {
             child.x = child.X + this.x
             child.y = child.Y + this.y
         })
     }
 
     set animation(animation) {
-        this._animation = function(){
+        this._animation = function () {
             animation()
-            this.children.forEach(child => { 
-                child.x =  child.X +  this.x 
-                child.y =  child.Y +  this.y 
+            this.children.forEach(child => {
+                child.x = child.X + this.x
+                child.y = child.Y + this.y
             })
         }
         this._isAnimation = true
     }
 
-    get animation(){
+    get animation() {
         return this._animation
     }
 
@@ -49,8 +54,8 @@ export default class Container extends Node {
         let index = this.children.findIndex(item => item === child)
         if (index > -1) {
             this.children.splice(index, 1)
-            child.X -= this.X
-            child.Y -= this.Y
+            child.x = child.X
+            child.y = child.Y
         }
     }
 
@@ -67,10 +72,10 @@ export default class Container extends Node {
     }
 
     draft() {
-        this.ctx.save()
-        this.ctx.strokeStyle = 'red'
-        this.ctx.rect(-this.left, -this.top, this.width, this.height)
-        this.ctx.stroke()
-        this.ctx.restore()
+        // this.ctx.save()
+        // this.ctx.beginPath()
+        // this.ctx.rect(-this.left, -this.top, this.width, this.height)
+        // this.ctx.stroke()
+        // this.ctx.restore()
     }
 }

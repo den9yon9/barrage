@@ -24,16 +24,16 @@ export default class Canvas2D {
   }
 
   loopCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.save()
-    this.ctx.scale(this.ratio, this.ratio);
     this.drawCanvas();
-    this.ctx.restore()
     this.requestId = window.requestAnimationFrame(this.loopCanvas.bind(this));
   }
 
   drawCanvas() {
-    this.nodes.sort((a,b)=>a.zIndex-b.zIndex).forEach(node => node.draw());
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.save()
+    this.ctx.scale(this.ratio, this.ratio);
+    this.nodes.sort((a, b) => a.zIndex - b.zIndex).forEach(node => node.draw());
+    this.ctx.restore()
   }
 
   cancelLoopCanvas() {

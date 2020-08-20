@@ -7,7 +7,7 @@ export default class Text extends Node {
     constructor(text, fontSize, X, Y, textAlign = 'left', textBaseline = 'middle') {
         super(X, Y)
         this.text = text
-        this.font = `${fontSize} sans-serif`
+        this.font = `${fontSize}px sans-serif`
         this.textAlign = textAlign
         this.textBaseline = textBaseline
     }

@@ -16,10 +16,33 @@ export default class Container extends Node {
 
     appendChild(child) {
         if (!this.children.includes(child)) {
-            child.X += this.X
-            child.Y += this.Y
+            child.x = child.X + this.x
+            child.y = child.Y + this.y
             this.children.push(child)
         }
+    }
+
+    resetAnimation(){
+        super.restore()
+        this.children.forEach(child=>{
+            child.x = child.X + this.x
+            child.y = child.Y + this.y
+        })
+    }
+
+    set animation(animation) {
+        this._animation = function(){
+            animation()
+            this.children.forEach(child => { 
+                child.x =  child.X +  this.x 
+                child.y =  child.Y +  this.y 
+            })
+        }
+        this._isAnimation = true
+    }
+
+    get animation(){
+        return this._animation
     }
 
     removeChild(child) {
@@ -44,8 +67,10 @@ export default class Container extends Node {
     }
 
     draft() {
+        this.ctx.save()
         this.ctx.strokeStyle = 'red'
         this.ctx.rect(-this.left, -this.top, this.width, this.height)
         this.ctx.stroke()
+        this.ctx.restore()
     }
 }

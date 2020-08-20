@@ -20,7 +20,6 @@ export default class Canvas2D {
     this.canvas.style.height = `${height}px`;
     this.canvas.width = width * this.ratio;
     this.canvas.height = height * this.ratio;
-    console.log(width,height)
     Canvas2D.instance = this;
   }
 
@@ -34,7 +33,7 @@ export default class Canvas2D {
   }
 
   drawCanvas() {
-    this.nodes.forEach(node => node.draw());
+    this.nodes.sort((a,b)=>a.zIndex-b.zIndex).forEach(node => node.draw());
   }
 
   cancelLoopCanvas() {
